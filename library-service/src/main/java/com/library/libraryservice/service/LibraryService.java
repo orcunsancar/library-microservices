@@ -8,6 +8,8 @@ import com.library.libraryservice.model.Library;
 import com.library.libraryservice.repository.LibraryRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,21 +27,20 @@ public class LibraryService {
         Library library = libraryRepository.findById(id)
                 .orElseThrow(() -> new LibraryNotFoundException("Library could not found by id: " + id));
 
-        LibraryDto libraryDto = new LibraryDto(library.getId(),
+        return new LibraryDto(Objects.requireNonNull(library.getId()),
                 library.getUserBook()
                         .stream()
                         .map(book -> bookServiceClient.getBookById(book).getBody())
                         .collect(Collectors.toList()));
-        return libraryDto;
     }
 
     public LibraryDto createLibrary() {
         Library newLibrary = libraryRepository.save(new Library());
-        return new LibraryDto(newLibrary.getId());
+        return new LibraryDto(Objects.requireNonNull(newLibrary.getId()));
     }
 
     public void addBookToLibrary(AddBookRequest request) {
-        String bookId = bookServiceClient.getBookByIsbn(request.getIsbn()).getBody().getBookId();
+        String bookId = Objects.requireNonNull(bookServiceClient.getBookByIsbn(request.getIsbn()).getBody()).getBookId();
 
         Library library = libraryRepository.findById(request.getId())
                 .orElseThrow(() -> new LibraryNotFoundException("Library could not found by id: " + request.getId()));
@@ -50,4 +51,10 @@ public class LibraryService {
         libraryRepository.save(library);
     }
 
+    public List<String> getAllBooksInLibraries() {
+        return libraryRepository.findAll()
+                .stream()
+                .map(Library::getId)
+                .collect(Collectors.toList());
+    }
 }
