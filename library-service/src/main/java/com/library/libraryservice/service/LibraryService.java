@@ -51,7 +51,7 @@ public class LibraryService {
         libraryRepository.save(library);
     }
 
-    public List<String> getAllBooksInLibraries() {
+    public List<String> getAllLibraries() {
         return libraryRepository.findAll()
                 .stream()
                 .map(Library::getId)
