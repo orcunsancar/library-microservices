@@ -21,7 +21,7 @@ public class LibraryController {
     private final LibraryService libraryService;
     private final Environment environment;
 
-    @Value("${library.service.count}")
+    @Value("${library-service.book.count}")
     private Integer count;
 
     public LibraryController(LibraryService libraryService, Environment environment) {
