@@ -1,11 +1,15 @@
 package com.library.libraryservice.service;
 
+import com.library.bookservice.dto.BookId;
+import com.library.bookservice.dto.BookServiceGrpc;
+import com.library.bookservice.dto.Isbn;
 import com.library.libraryservice.client.BookServiceClient;
 import com.library.libraryservice.dto.AddBookRequest;
 import com.library.libraryservice.dto.LibraryDto;
 import com.library.libraryservice.exception.LibraryNotFoundException;
 import com.library.libraryservice.model.Library;
 import com.library.libraryservice.repository.LibraryRepository;
+import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +19,8 @@ import java.util.stream.Collectors;
 @Service
 public class LibraryService {
 
+    @GrpcClient("book-service")
+    private BookServiceGrpc.BookServiceBlockingStub bookServiceBlockingStub;
     private final LibraryRepository libraryRepository;
     private final BookServiceClient bookServiceClient;
 
@@ -40,8 +46,8 @@ public class LibraryService {
     }
 
     public void addBookToLibrary(AddBookRequest request) {
-        String bookId = Objects.requireNonNull(bookServiceClient.getBookByIsbn(request.getIsbn()).getBody()).getBookId();
-
+        BookId bookIdByIsbn = bookServiceBlockingStub.getBookIdByIsbn(Isbn.newBuilder().setIsbn(request.getIsbn()).build());
+        String bookId = bookIdByIsbn.getBookId();
         Library library = libraryRepository.findById(request.getId())
                 .orElseThrow(() -> new LibraryNotFoundException("Library could not found by id: " + request.getId()));
 
